@@ -116,7 +116,7 @@ pipeline {
         }
 
         stage('Pull and Push image to QA') {
-            when { expression { params.ENVIRONMENT == 'qa' && params.IMAGE_TAG == '' } }
+            when { expression { params.ENVIRONMENT == 'qa' } }
             steps {
                 script {
                     def sourceAcrName = "${env.PROJECT_NAME}devacr"
@@ -167,7 +167,7 @@ pipeline {
         }
 
         stage('Pull and Push image to UAT') {
-            when { expression { params.ENVIRONMENT == 'uat' && params.IMAGE_TAG == '' } }
+            when { expression { params.ENVIRONMENT == 'uat' } }
             steps {
                 script {
                     def sourceAcrName = "${env.PROJECT_NAME}qaacr"
@@ -225,7 +225,7 @@ pipeline {
         }
 
         stage('Pull and Push image to PROD') {
-            when { expression { params.ENVIRONMENT == 'prod' && params.IMAGE_TAG == '' } }
+            when { expression { params.ENVIRONMENT == 'prod' } }
             steps {
                 script {
                     def sourceAcrName = "${env.PROJECT_NAME}uatacr"
