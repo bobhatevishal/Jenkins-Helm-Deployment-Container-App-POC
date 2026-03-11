@@ -14,6 +14,10 @@ This repository, **Helm-deployment-app** (codenamed **Snaplink**), is a multi-ti
 
 ## 2. Architecture Overview
 
+## architecture_diagram
+<img width="784" height="704" alt="architecture_diagram" src="https://github.com/user-attachments/assets/8efb01e0-4913-474a-8c3c-1e20b3b2e7b0" />
+
+
 ### Application Architecture
 Snaplink follows a standard, resilient microservices architecture comprising four core components:
 
@@ -81,5 +85,6 @@ Each microservice has its own dedicated pipeline for independent lifecycle manag
 * **Subscription Isolation:** To enforce strict logical isolation, prevent accidental cross-environment deployments, and simplify cost management, **each environment (dev, qa, uat, prod) utilizes a dedicated and distinct Azure Subscription ID.**
 * **Secret Management:** Database passwords and other sensitive configuration secrets are injected into the Helm deployments securely via the CI/CD pipeline, ensuring that no hardcoded secrets reside in the source code repository.
 <img width="940" height="513" alt="image" src="https://github.com/user-attachments/assets/88bf3770-3e9a-43aa-a947-4a6c0a8a860d" />
+
 
 
