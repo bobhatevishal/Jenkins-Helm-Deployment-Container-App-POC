@@ -195,6 +195,7 @@ def deployToAKS(envName) {
            -e "s|<image_tag>|${RESOLVED_TAG}|g" ${HELM_VALUES_FILE}
 
         helm upgrade --install ${env.HELM_COMPONENT} helm_charts \\
+            --namespace snaplink-ns --create-namespace \\
             \$HELM_UPGRADE_OPT \\
             -f ${HELM_VALUES_FILE}
     """
