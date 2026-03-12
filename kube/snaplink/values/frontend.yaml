@@ -20,4 +20,5 @@ env:
 ingress:
   enabled: true
   domain: "snaplink.com"
+  tlsSecret: "snaplink-tls-secret"
 healthPath: "/"
