@@ -20,3 +20,4 @@ env:
 ingress:
   enabled: true
   domain: "snaplink.com"
+healthPath: "/"

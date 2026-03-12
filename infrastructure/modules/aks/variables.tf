@@ -55,8 +55,6 @@ variable "subnet_ids" {
 
 variable "appgw_subnet_id" {
   type        = string
-  default     = null
-  description = "The ID of the subnet dedicated to Application Gateway for AGIC"
 }
 
 variable "tags" {
