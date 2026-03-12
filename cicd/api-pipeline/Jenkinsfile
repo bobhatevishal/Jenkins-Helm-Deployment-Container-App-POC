@@ -33,7 +33,9 @@ pipeline {
         // Tag Logic
         COMMIT_ID           = "${env.GIT_COMMIT ? env.GIT_COMMIT.take(8) : ''}"
         RESOLVED_TAG        = "${params.IMAGE_TAG ?: env.COMPONENT_DIR + '-' + env.COMMIT_ID}"
-     
+
+        // Isolate Azure CLI profile to this workspace to prevent interference from other pipelines
+        AZURE_CONFIG_DIR    = "${WORKSPACE}/.azure"
     }
 
     stages {
@@ -166,14 +168,12 @@ def pullTagAndPush(sourceEnv, targetEnv) {
 
     echo "----------------------------------------------------------"
     echo "PROMOTE: Promoting image from ${sourceEnv.toUpperCase()} to ${targetEnv.toUpperCase()} ACR"
-    sh "az acr login --name ${sourceAcrName}"
-    sh "az acr login --name ${targetAcrName}"
     
+    sh "az acr login --name ${sourceAcrName}"
+    sh "docker pull ${sourceAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG}"
+    
+    sh "az acr login --name ${targetAcrName}"
     sh """
-        az account set --subscription '${env."SUB_ID_${sourceEnv.toUpperCase()}"}'
-        docker pull ${sourceAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG}
-        
-        az account set --subscription '${env."SUB_ID_${targetEnv.toUpperCase()}"}'
         docker tag ${sourceAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG}
         docker push ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG}
     """
@@ -191,6 +191,7 @@ def deployToAKS(envName) {
     echo "Deploying Image Tag: ${env.RESOLVED_TAG}"
     
     sh """
+        export AZURE_CONFIG_DIR=${env.AZURE_CONFIG_DIR}
         az account set --subscription '${env."SUB_ID_${envName.toUpperCase()}"}'
         az aks get-credentials --resource-group ${resourceGroup} --name ${clusterName} --overwrite-existing
         if helm status ${env.HELM_COMPONENT} > /dev/null 2>&1; then
