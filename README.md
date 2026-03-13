@@ -5,7 +5,7 @@
 ![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD%20Automation-blue?logo=jenkins)
 ![Terraform](https://img.shields.io/badge/Terraform-IaC%20Automation-blue?logo=terraform)
 
-## 1. Executive Summary
+## 1. Executive Summary  ,,,,
 
 This repository, **Helm-deployment-app** (codenamed **Snaplink**), is a multi-tier, containerized microservices application Proof of Concept (POC). It is designed for high availability and scalable deployment on **Azure Kubernetes Service (AKS)**. The project demonstrates a fully automated, state-of-the-art DevOps workflow:
 
@@ -85,6 +85,7 @@ Each microservice has its own dedicated pipeline for independent lifecycle manag
 * **Subscription Isolation:** To enforce strict logical isolation, prevent accidental cross-environment deployments, and simplify cost management, **each environment (dev, qa, uat, prod) utilizes a dedicated and distinct Azure Subscription ID.**
 * **Secret Management:** Database passwords and other sensitive configuration secrets are injected into the Helm deployments securely via the CI/CD pipeline, ensuring that no hardcoded secrets reside in the source code repository.
 <img width="940" height="513" alt="image" src="https://github.com/user-attachments/assets/88bf3770-3e9a-43aa-a947-4a6c0a8a860d" />
+
 
 
 
