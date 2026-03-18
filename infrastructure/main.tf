@@ -36,6 +36,8 @@ module "acr" {
   resource_group_name = module.resource_group.name
   location            = module.resource_group.location
   sku                 = var.acr_sku
+  enable_oms_agent    = var.enable_oms_agent
+  enable_azure_policy = var.enable_azure_policy
   tags                = local.common_tags
 }
 

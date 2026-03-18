@@ -46,15 +46,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
     dns_service_ip    = "172.16.0.10"
   }
 
-  oms_agent {
-    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
+  dynamic "oms_agent" {
+    for_each = var.enable_oms_agent ? [1] : []
+    content {
+      log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
+    }
   }
 
   ingress_application_gateway {
     subnet_id = var.appgw_subnet_id
   }
 
-  azure_policy_enabled = true
+  azure_policy_enabled = var.enable_azure_policy
 
   lifecycle {
     ignore_changes = [

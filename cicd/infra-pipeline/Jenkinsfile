@@ -185,7 +185,8 @@ pipeline {
                             --namespace argocd \
                             --version 7.4.4 \
                             --values argocd/argocd-values.yaml \
-                            --wait
+                            --wait \
+                            --timeout 15m
 
                         # 5. Apply App-of-Apps
                         echo "Applying App-of-Apps..."

@@ -57,6 +57,16 @@ variable "appgw_subnet_id" {
   type        = string
 }
 
+variable "enable_oms_agent" {
+  type        = bool
+  default     = true
+}
+
+variable "enable_azure_policy" {
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   type        = map(string)
 }

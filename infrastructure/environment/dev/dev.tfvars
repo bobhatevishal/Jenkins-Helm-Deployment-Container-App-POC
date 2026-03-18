@@ -23,6 +23,8 @@ vm_size            = "Standard_D2s_v3"
 os_disk_size_gb    = 50
 kubernetes_version = null
 aks_sku_tier       = "Free"
+enable_oms_agent    = false
+enable_azure_policy = false
 
 # ACR Configuration
 acr_sku = "Basic"
