@@ -36,8 +36,6 @@ module "acr" {
   resource_group_name = module.resource_group.name
   location            = module.resource_group.location
   sku                 = var.acr_sku
-  enable_oms_agent    = var.enable_oms_agent
-  enable_azure_policy = var.enable_azure_policy
   tags                = local.common_tags
 }
 
@@ -56,5 +54,7 @@ module "aks" {
   acr_id              = module.acr.acr_id
   subnet_ids          = module.vnet.private_subnet_ids
   appgw_subnet_id     = module.vnet.appgw_subnet_id
+  enable_oms_agent    = var.enable_oms_agent
+  enable_azure_policy = var.enable_azure_policy
   tags                = local.common_tags
 }
