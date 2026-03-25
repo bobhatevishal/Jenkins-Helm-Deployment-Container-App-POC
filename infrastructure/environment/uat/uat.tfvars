@@ -15,14 +15,8 @@ private_subnets = {
   "pvt-subnet-0" = "10.0.0.0/24"
 }
 
-# AKS Configuration
-node_count         = 1
-min_count          = 1
-max_count          = 3
-vm_size            = "Standard_D2s_v3"
-os_disk_size_gb    = 30
-kubernetes_version = null
-aks_sku_tier       = "Standard"
+# ACA Configuration
+aca_subnet_prefix  = "10.0.30.0/24"
 
 # ACR Configuration
 acr_sku = "Standard"
