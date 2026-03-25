@@ -21,3 +21,7 @@ output "nsg_id" {
 output "appgw_subnet_id" {
   value       = azurerm_subnet.appgw.id
 }
+
+output "aca_subnet_id" {
+  value       = azurerm_subnet.aca.id
+}

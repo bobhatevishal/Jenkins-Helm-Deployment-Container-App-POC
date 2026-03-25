@@ -49,3 +49,9 @@ variable "acr_sku" {
   type        = string
   default     = "Premium"
 }
+
+# Container Apps
+variable "aca_subnet_prefix" {
+  type        = string
+  description = "The address prefix for the Container Apps subnet"
+}

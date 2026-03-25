@@ -33,6 +33,22 @@ resource "azurerm_subnet" "appgw" {
   address_prefixes     = ["10.0.20.0/24"] # Dedicated range for App Gateway
 }
 
+# Dedicated Subnet for Azure Container Apps
+resource "azurerm_subnet" "aca" {
+  name                 = "snet-aca"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.aca_subnet_prefix]
+
+  delegation {
+    name = "Microsoft.App.environments"
+    service_delegation {
+      name    = "Microsoft.App/environments"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+    }
+  }
+}
+
 # Network Security Group
 resource "azurerm_network_security_group" "nsg" {
   name                = "${var.vnet_name}-nsg"
@@ -119,7 +135,8 @@ locals {
   # Associate NSG with private subnets AND the appgw subnet
   nsg_subnets = merge(
     { for k, v in azurerm_subnet.private : k => v.id },
-    { "appgw" = azurerm_subnet.appgw.id }
+    { "appgw" = azurerm_subnet.appgw.id },
+    { "aca"   = azurerm_subnet.aca.id }
   )
 }
 

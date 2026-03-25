@@ -25,3 +25,8 @@ variable "location" {
 variable "tags" {
   type        = map(string)
 }
+
+variable "aca_subnet_prefix" {
+  type        = string
+  description = "The address prefix for the Container Apps subnet"
+}

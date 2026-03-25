@@ -24,6 +24,7 @@ module "vnet" {
   vnet_address_space  = var.vnet_address_space
   public_subnets  = var.public_subnets
   private_subnets = var.private_subnets
+  aca_subnet_prefix = var.aca_subnet_prefix
 
   tags = local.common_tags
 }
@@ -41,9 +42,22 @@ module "acr" {
 
 # 4. Azure Container Apps Environment
 module "aca_env" {
-  source              = "./modules/aca_env"
-  name                = "${var.project_name}-${var.environment}-env"
-  resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
-  tags                = local.common_tags
-}
+  source                     = "./modules/aca_env"
+  name                       = "${var.project_name}-${var.environment}-env"
+  resource_group_name        = module.resource_group.name
+  location                   = module.resource_group.location
+  infrastructure_subnet_id   = module.vnet.aca_subnet_id
+  tags                       = local.common_tags
+}
+
+# 5. Azure Container App
+module "aca_app" {
+  source                       = "./modules/aca_app"
+  name                         = "${var.project_name}-${var.environment}-app"
+  resource_group_name          = module.resource_group.name
+  location                     = module.resource_group.location
+  container_app_environment_id = module.aca_env.id
+  acr_id                       = module.acr.acr_id
+  registry_server              = module.acr.login_server
+  tags                         = local.common_tags
+}
