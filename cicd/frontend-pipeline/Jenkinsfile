@@ -59,10 +59,10 @@ pipeline {
             }
         }
 
-        stage('Deploy to AKS in DEV') {
+        stage('Deploy to ACA in DEV') {
             when { expression { params.ENVIRONMENT == 'dev' } }
             steps {
-                script { deployToAKS('dev') }
+                script { deployToACA('dev') }
             }
         }
 
@@ -73,10 +73,10 @@ pipeline {
             }
         }
 
-        stage('Deploy to AKS in QA') {
+        stage('Deploy to ACA in QA') {
             when { expression { params.ENVIRONMENT == 'qa' } }
             steps {
-                script { deployToAKS('qa') }
+                script { deployToACA('qa') }
             }
         }
 
@@ -87,10 +87,10 @@ pipeline {
             }
         }
 
-        stage('Deploy to AKS in UAT') {
+        stage('Deploy to ACA in UAT') {
             when { expression { params.ENVIRONMENT == 'uat' } }
             steps {
-                script { deployToAKS('uat') }
+                script { deployToACA('uat') }
             }
         }
 
@@ -108,10 +108,10 @@ pipeline {
             }
         }
 
-        stage('Deploy to AKS in PROD') {
+        stage('Deploy to ACA in PROD') {
             when { expression { params.ENVIRONMENT == 'prod' } }
             steps {
-                script { deployToAKS('prod') }
+                script { deployToACA('prod') }
             }
         }
     }
@@ -179,30 +179,24 @@ def pullTagAndPush(sourceEnv, targetEnv) {
     """
 }
 
-def deployToAKS(envName) {
+def deployToACA(envName) {
     def targetAcrName = "${env.PROJECT_NAME}${envName}acr"
+    def resourceGroup = "${env.PROJECT_NAME}-${envName}-rg"
+    def containerAppName = "frontend"
 
     echo "----------------------------------------------------------"
-    echo "DEPLOY (GitOps): Updating manifest for ${envName.toUpperCase()}"
+    echo "DEPLOY: Updating Azure Container App for ${envName.toUpperCase()}"
     echo "Using Registry: ${targetAcrName}.azurecr.io"
     echo "Deploying Image Tag: ${env.RESOLVED_TAG}"
     
     sh """
-        # Set up Git for Jenkins user
-        git config user.name "Jenkins CI"
-        git config user.email "jenkins@example.com"
+        # Ensure we are logged in and sets the correct subscription id
+        az account set --subscription '${env.SUB_ID}'
 
-        # We replace the placeholders in the values file and commit the file
-        sed -i -e "s|<registry>|${targetAcrName}.azurecr.io|g" \\
-           -e "s|<repo_name>|${COMPONENT_REPO}|g" \\
-           -e "s|<image_tag>|${RESOLVED_TAG}|g" ${HELM_VALUES_FILE}
-
-        # Commit and push via GitOps
-        git add ${HELM_VALUES_FILE}
-        git commit -m "Deploy ${COMPONENT_REPO} to ${envName.toUpperCase()}: ${RESOLVED_TAG} [skip ci]"
-        
-        # Use authenticated URL for push (using environment variables)
-        git push https://${GIT_USER_USR}:${GIT_USER_PSW}@github.com/bobhatevishal/Helm-deployment-app.git HEAD:main
+        az containerapp update \\
+            --name ${containerAppName} \\
+            --resource-group ${resourceGroup} \\
+            --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG}
     """
 }
 

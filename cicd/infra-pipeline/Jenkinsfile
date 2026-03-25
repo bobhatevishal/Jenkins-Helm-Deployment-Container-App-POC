@@ -116,87 +116,9 @@ pipeline {
             }
         }
 
-        stage('Grant AGIC Permissions') {
-            when {
-                expression { params.ACTION == 'apply' }
-            }
-            steps {
-                script {
-                    echo "AZURE: Granting Network Contributor permissions to AGIC Identity..."
-                    sh """
-                        # 1. Get Cluster Name and Resource Group from Terraform
-                        CLUSTER_NAME=\$(terraform -chdir=infrastructure output -raw aks_cluster_name)
-                        RG_NAME=\$(terraform -chdir=infrastructure output -raw resource_group_name)
-                        SUBNET_ID=\$(terraform -chdir=infrastructure output -raw appgw_subnet_id)
-                        
-                        # 2. Get the Managed Resource Group (Node RG)
-                        NODE_RG=\$(az aks show --resource-group \$RG_NAME --name \$CLUSTER_NAME --query nodeResourceGroup -o tsv)
-                        
-                        # 3. Find ALL User-Assigned Identities in the Node RG
-                        IDENTITY_IDS=\$(az identity list --resource-group \$NODE_RG --query "[].principalId" -o tsv)
-                        
-                        if [ -z "\$IDENTITY_IDS" ]; then
-                           echo "Error: No identities found in Node RG \$NODE_RG"
-                           exit 1
-                        fi
-                        
-                        # Loop through every identity and grant Network Contributor on the Gateway Subnet
-                        for ID in \$IDENTITY_IDS; do
-                           echo "--------------------------------------------------------"
-                           echo "Granting Network Contributor on Subnet: \$SUBNET_ID"
-                           echo "To Identity ID: \$ID"
-                           
-                           # Retry logic for role assignment as Azure identities can be slow to propagate
-                           for i in {1..5}; do
-                               az role assignment create \
-                                   --role "Network Contributor" \
-                                   --assignee-object-id "\$ID" \
-                                   --assignee-principal-type "ServicePrincipal" \
-                                   --scope "\$SUBNET_ID" && break || sleep 15
-                           done
-                        done
-                    """
-                }
-            }
-        }
 
-        stage('Deploy ArgoCD') {
-            when {
-                expression { params.ACTION == 'apply' }
-            }
-            steps {
-                script {
-                    echo "HELM: Deploying ArgoCD..."
-                    sh """
-                        # 1. Get Cluster Credentials
-                        CLUSTER_NAME=\$(terraform -chdir=infrastructure output -raw aks_cluster_name)
-                        RG_NAME=\$(terraform -chdir=infrastructure output -raw resource_group_name)
-                        az aks get-credentials --resource-group \$RG_NAME --name \$CLUSTER_NAME --overwrite-existing
 
-                        # 2. Add ArgoCD Helm Repository
-                        helm repo add argocd https://argoproj.github.io/argo-helm
-                        helm repo update
 
-                        # 3. Create Namespace (if not exists)
-                        kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-
-                        # 4. Install/Upgrade ArgoCD (Core)
-                        helm upgrade --install argocd argocd/argo-cd \
-                            --namespace argocd \
-                            --version 7.4.4 \
-                            --values argocd/argocd-values.yaml \
-                            --wait \
-                            --timeout 15m
-
-                        # 5. Deploy ArgoCD Bootstrap Applications
-                        echo "Deploying ArgoCD Bootstrap Applications via Helm..."
-                        helm upgrade --install argocd-apps helm_charts/argocd-apps \
-                            --namespace argocd \
-                            --wait
-                    """
-                }
-            }
-        }
 
         stage('Terraform Destroy') {
             when {
