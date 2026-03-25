@@ -70,4 +70,10 @@ resource "azurerm_container_app" "app" {
   depends_on = [
     azurerm_role_assignment.acr_pull
   ]
+
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image
+    ]
+  }
 }
