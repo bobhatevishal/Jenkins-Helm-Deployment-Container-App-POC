@@ -197,11 +197,15 @@ def deployToACA(envName) {
         # Ensure we are logged in and sets the correct subscription id
         az account set --subscription '${env.SUB_ID}'
 
+        az containerapp secret set \\
+            --name ${containerAppName} \\
+            --resource-group ${resourceGroup} \\
+            --secrets db-password="\$DB_PASS"
+
         az containerapp update \\
             --name ${containerAppName} \\
             --resource-group ${resourceGroup} \\
             --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
-            --set-secrets db-password="\$DB_PASS" \\
             --set-env-vars DB_HOST=${envName}-db DB_USER="\$DB_USER" DB_PASS=secretref:db-password
     """
 }
