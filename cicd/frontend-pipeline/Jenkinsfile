@@ -193,10 +193,14 @@ def deployToACA(envName) {
         # Ensure we are logged in and sets the correct subscription id
         az account set --subscription '${env.SUB_ID}'
 
+        # Extract the FQDN of the API to give to Nginx
+        API_FQDN=\$(az containerapp show --name ${envName}-api --resource-group ${resourceGroup} --query properties.configuration.ingress.fqdn -o tsv)
+
         az containerapp update \\
             --name ${containerAppName} \\
             --resource-group ${resourceGroup} \\
-            --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG}
+            --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
+            --set-env-vars API_URL="https://\$API_FQDN"
     """
 }
 

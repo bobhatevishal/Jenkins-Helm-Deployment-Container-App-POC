@@ -201,7 +201,8 @@ def deployToACA(envName) {
             --name ${containerAppName} \\
             --resource-group ${resourceGroup} \\
             --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
-            --set-env-vars DB_USER=${DB_USER} DB_PASS=${DB_PASS}
+            --set-secrets db-password="\$DB_PASS" \\
+            --set-env-vars POSTGRES_USER="\$DB_USER" POSTGRES_PASSWORD=secretref:db-password DB_USER="\$DB_USER" DB_PASS=secretref:db-password
     """
 }
 
