@@ -50,10 +50,44 @@ module "aca_env" {
   tags                       = local.common_tags
 }
 
-# 5. Azure Container App
-module "aca_app" {
+# 5. Azure Container Apps
+
+module "aca_db" {
   source                       = "./modules/aca_app"
-  name                         = "${var.project_name}-${var.environment}-app"
+  name                         = "${var.environment}-db"
+  resource_group_name          = module.resource_group.name
+  location                     = module.resource_group.location
+  container_app_environment_id = module.aca_env.id
+  acr_id                       = module.acr.acr_id
+  registry_server              = module.acr.login_server
+  tags                         = local.common_tags
+}
+
+module "aca_api" {
+  source                       = "./modules/aca_app"
+  name                         = "${var.environment}-api"
+  resource_group_name          = module.resource_group.name
+  location                     = module.resource_group.location
+  container_app_environment_id = module.aca_env.id
+  acr_id                       = module.acr.acr_id
+  registry_server              = module.acr.login_server
+  tags                         = local.common_tags
+}
+
+module "aca_frontend" {
+  source                       = "./modules/aca_app"
+  name                         = "${var.environment}-frontend"
+  resource_group_name          = module.resource_group.name
+  location                     = module.resource_group.location
+  container_app_environment_id = module.aca_env.id
+  acr_id                       = module.acr.acr_id
+  registry_server              = module.acr.login_server
+  tags                         = local.common_tags
+}
+
+module "aca_cache" {
+  source                       = "./modules/aca_app"
+  name                         = "${var.environment}-cache"
   resource_group_name          = module.resource_group.name
   location                     = module.resource_group.location
   container_app_environment_id = module.aca_env.id

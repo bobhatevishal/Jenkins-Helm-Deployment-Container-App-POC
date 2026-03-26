@@ -186,7 +186,7 @@ def pullTagAndPush(sourceEnv, targetEnv) {
 def deployToACA(envName) {
     def targetAcrName = "${env.PROJECT_NAME}${envName}acr"
     def resourceGroup = "${env.PROJECT_NAME}-${envName}-rg"
-    def containerAppName = "api" // The name of your Azure Container App
+    def containerAppName = "${envName}-api" // The name of your Azure Container App
 
     echo "----------------------------------------------------------"
     echo "DEPLOY: Updating Azure Container App for ${envName.toUpperCase()}"
@@ -201,7 +201,7 @@ def deployToACA(envName) {
             --name ${containerAppName} \\
             --resource-group ${resourceGroup} \\
             --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
-            --set-env-vars DB_HOST=db DB_USER=${DB_USER} DB_PASS=${DB_PASS}
+            --set-env-vars DB_HOST=${envName}-db DB_USER=${DB_USER} DB_PASS=${DB_PASS}
     """
 }
 

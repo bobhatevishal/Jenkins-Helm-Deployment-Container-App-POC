@@ -182,7 +182,7 @@ def pullTagAndPush(sourceEnv, targetEnv) {
 def deployToACA(envName) {
     def targetAcrName = "${env.PROJECT_NAME}${envName}acr"
     def resourceGroup = "${env.PROJECT_NAME}-${envName}-rg"
-    def containerAppName = "cache"
+    def containerAppName = "${envName}-cache"
 
     echo "----------------------------------------------------------"
     echo "DEPLOY: Updating Azure Container App for ${envName.toUpperCase()}"

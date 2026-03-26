@@ -23,7 +23,22 @@ output "appgw_subnet_id" {
   value = module.vnet.appgw_subnet_id
 }
 
-output "aca_app_fqdn" {
-  value       = module.aca_app.fqdn
-  description = "The FQDN of the Azure Container App"
+output "aca_db_fqdn" {
+  value       = module.aca_db.fqdn
+  description = "The FQDN of the db Azure Container App"
+}
+
+output "aca_api_fqdn" {
+  value       = module.aca_api.fqdn
+  description = "The FQDN of the api Azure Container App"
+}
+
+output "aca_frontend_fqdn" {
+  value       = module.aca_frontend.fqdn
+  description = "The FQDN of the frontend Azure Container App"
+}
+
+output "aca_cache_fqdn" {
+  value       = module.aca_cache.fqdn
+  description = "The FQDN of the cache Azure Container App"
 }
