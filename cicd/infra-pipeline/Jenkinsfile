@@ -59,7 +59,7 @@ pipeline {
                     
                     terraform -chdir=infrastructure init \
                         -reconfigure \
-                        -backend-config="key=${params.ENVIRONMENT}/${params.ENVIRONMENT}.tfstate"
+                        -backend-config="environment/${params.ENVIRONMENT}/${params.ENVIRONMENT}-backend.tf"
                 """
             }
         }
