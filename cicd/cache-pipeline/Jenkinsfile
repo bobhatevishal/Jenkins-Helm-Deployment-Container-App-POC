@@ -181,7 +181,7 @@ def pullTagAndPush(sourceEnv, targetEnv) {
 
 def deployToACA(envName) {
     def targetAcrName = "${env.PROJECT_NAME}${envName}acr"
-    def resourceGroup = "${env.PROJECT_NAME}-${envName}-rg"
+    def resourceGroup = "helm-deployment-app-${envName}-rg"
     def containerAppName = "${envName}-cache"
 
     echo "----------------------------------------------------------"
