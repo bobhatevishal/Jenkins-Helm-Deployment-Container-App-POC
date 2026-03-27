@@ -29,8 +29,9 @@ resource "azurerm_container_app" "app" {
   }
 
   ingress {
-    external_enabled = true
+    external_enabled = var.external_enabled
     target_port      = var.container_port
+    transport        = var.is_http ? "auto" : "tcp"
     traffic_weight {
       percentage      = 100
       latest_revision = true
@@ -46,14 +47,14 @@ resource "azurerm_container_app" "app" {
 
       liveness_probe {
         port      = var.container_port
-        transport = "HTTP"
-        path      = "/"
+        transport = var.is_http ? "HTTP" : "TCP"
+        path      = var.is_http ? "/" : null
       }
 
       readiness_probe {
         port      = var.container_port
-        transport = "HTTP"
-        path      = "/"
+        transport = var.is_http ? "HTTP" : "TCP"
+        path      = var.is_http ? "/" : null
       }
     }
 
@@ -61,9 +62,20 @@ resource "azurerm_container_app" "app" {
     max_replicas = var.max_replicas
 
     # KEDA Scaling rule
-    http_scale_rule {
-      name                = "http-scaling"
-      concurrent_requests = 10
+    dynamic "http_scale_rule" {
+      for_each = var.is_http ? [1] : []
+      content {
+        name                = "http-scaling"
+        concurrent_requests = 10
+      }
+    }
+
+    dynamic "tcp_scale_rule" {
+      for_each = var.is_http ? [] : [1]
+      content {
+        name                = "tcp-scaling"
+        concurrent_requests = 100
+      }
     }
   }
 

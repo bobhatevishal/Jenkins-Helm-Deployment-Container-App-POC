@@ -60,6 +60,9 @@ module "aca_db" {
   container_app_environment_id = module.aca_env.id
   acr_id                       = module.acr.acr_id
   registry_server              = module.acr.login_server
+  container_port               = 5432
+  is_http                      = false
+  external_enabled             = false
   tags                         = local.common_tags
 }
 
@@ -71,6 +74,7 @@ module "aca_api" {
   container_app_environment_id = module.aca_env.id
   acr_id                       = module.acr.acr_id
   registry_server              = module.acr.login_server
+  container_port               = 5000
   tags                         = local.common_tags
 }
 
@@ -93,5 +97,8 @@ module "aca_cache" {
   container_app_environment_id = module.aca_env.id
   acr_id                       = module.acr.acr_id
   registry_server              = module.acr.login_server
+  container_port               = 6379
+  is_http                      = false
+  external_enabled             = false
   tags                         = local.common_tags
 }

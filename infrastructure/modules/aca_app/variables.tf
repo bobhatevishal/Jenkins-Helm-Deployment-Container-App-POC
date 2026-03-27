@@ -58,6 +58,18 @@ variable "container_port" {
   default     = 80
 }
 
+variable "is_http" {
+  type        = bool
+  description = "Whether the app uses HTTP ingress with HTTP health probes."
+  default     = true
+}
+
+variable "external_enabled" {
+  type        = bool
+  description = "Whether the app is accessible from the internet."
+  default     = true
+}
+
 variable "min_replicas" {
   type        = number
   description = "The minimum number of replicas for scaling."
