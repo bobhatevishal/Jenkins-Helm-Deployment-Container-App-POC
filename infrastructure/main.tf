@@ -75,6 +75,7 @@ module "aca_api" {
   acr_id                       = module.acr.acr_id
   registry_server              = module.acr.login_server
   container_port               = 5000
+  external_enabled             = false
   tags                         = local.common_tags
 }
 
