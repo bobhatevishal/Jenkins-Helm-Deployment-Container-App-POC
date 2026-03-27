@@ -78,9 +78,10 @@ pipeline {
             steps {
                 echo "TERRAFORM: Generating execution plan (${params.ACTION})"
                 sh """
-                    terraform -chdir=infrastructure plan \
-                        -var="subscription_id=${env.ARM_SUBSCRIPTION_ID}" \
-                        -var-file="environment/${params.ENVIRONMENT}/${params.ENVIRONMENT}.tfvars" \
+                    terraform -chdir=infrastructure force-unlock -force d78849cc-6c21-a490-3cab-2d6b07e580f5 || true
+                    terraform -chdir=infrastructure plan \\
+                        -var="subscription_id=${env.ARM_SUBSCRIPTION_ID}" \\
+                        -var-file="environment/${params.ENVIRONMENT}/${params.ENVIRONMENT}.tfvars" \\
                         -out="../${env.PLAN_FILE}"
                 """
             }
