@@ -200,7 +200,7 @@ def deployToACA(envName) {
             --name ${containerAppName} \\
             --resource-group ${resourceGroup} \\
             --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
-            --set-env-vars API_URL="http://\$API_FQDN"
+            --set-env-vars API_URL="http://\$API_FQDN:5000"
     """
 }
 
