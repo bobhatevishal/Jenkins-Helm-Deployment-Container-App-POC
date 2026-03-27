@@ -202,15 +202,13 @@ def deployToACA(envName) {
             --resource-group ${resourceGroup} \\
             --secrets db-password="\$DB_PASS"
 
-        # Dynamically fetch the internal FQDNs for DB and Cache
-        DB_FQDN=\$(az containerapp show --name ${envName}-db --resource-group ${resourceGroup} --query properties.configuration.ingress.fqdn -o tsv)
-        CACHE_FQDN=\$(az containerapp show --name ${envName}-cache --resource-group ${resourceGroup} --query properties.configuration.ingress.fqdn -o tsv)
-
+        # Within the same ACA Environment, apps communicate via their app name on their target port.
+        # No FQDN lookup is needed — ACA's internal DNS resolves <app-name> within the environment.
         az containerapp update \\
             --name ${containerAppName} \\
             --resource-group ${resourceGroup} \\
             --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
-            --set-env-vars DB_HOST="\$DB_FQDN" DB_USER="\$DB_USER" DB_PASS=secretref:db-password REDIS_URL="redis://\$CACHE_FQDN:6379/0"
+            --set-env-vars DB_HOST="${envName}-db" DB_PORT="5432" DB_NAME="urlshort" DB_USER="\$DB_USER" DB_PASS=secretref:db-password REDIS_URL="redis://${envName}-cache:6379/0"
     """
 }
 

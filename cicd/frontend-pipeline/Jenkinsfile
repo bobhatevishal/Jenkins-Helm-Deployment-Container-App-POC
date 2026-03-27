@@ -193,14 +193,13 @@ def deployToACA(envName) {
         # Ensure we are logged in and sets the correct subscription id
         az account set --subscription '${env.SUB_ID}'
 
-        # Extract the FQDN of the API to give to Nginx
-        API_FQDN=\$(az containerapp show --name ${envName}-api --resource-group ${resourceGroup} --query properties.configuration.ingress.fqdn -o tsv)
-
-        az containerapp update \\
-            --name ${containerAppName} \\
-            --resource-group ${resourceGroup} \\
-            --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
-            --set-env-vars API_URL="http://\$API_FQDN:5000" API_HOSTNAME="\$API_FQDN"
+        # Within the same ACA Environment, apps are reachable at http://<app-name> on port 80 (internal ingress).
+        # No FQDN lookup is needed — ACA's built-in DNS handles the resolution.
+        az containerapp update \\\\
+            --name ${containerAppName} \\\\
+            --resource-group ${resourceGroup} \\\\
+            --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\\\
+            --set-env-vars API_URL="http://${envName}-api"
     """
 }
 

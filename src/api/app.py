@@ -39,17 +39,24 @@ DB_PORT = os.environ.get("DB_PORT", "5432")
 
 # Safety Check - Fail fast if credentials are missing
 if not DB_USER or not DB_PASS:
-    print("❌ CRITICAL ERROR: DB_USER or DB_PASS not set in environment!")
-    # In a real environment, you might want to exit(1) here
-    # For now, we will let it crash on first connect for visibility
+    print("❌ CRITICAL: DB_USER or DB_PASS not set — API will fail to connect to the database.")
 
-# Constructing fallback URL for legacy support if needed (internal use)
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
-REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
+# ── Lazy Redis connection ──────────────────────────────────────────
+_cache_client = None
 
-# Redis client
-cache = redis.from_url(REDIS_URL, decode_responses=True)
+def get_cache():
+    """Return a Redis client, connecting lazily so startup never crashes."""
+    global _cache_client
+    if _cache_client is None:
+        try:
+            _cache_client = redis.from_url(REDIS_URL, decode_responses=True, socket_connect_timeout=5)
+            _cache_client.ping()
+        except Exception as e:
+            print(f"⚠️  Redis unavailable ({e}). Cache features disabled.")
+            _cache_client = None
+    return _cache_client
 
 # Track cache stats in memory
 cache_stats = {"hits": 0, "misses": 0}
@@ -164,10 +171,14 @@ def health():
     except Exception:
         status["database"] = "error"
 
-    try:
-        cache.ping()
-        status["redis"] = "ok"
-    except Exception:
+    c = get_cache()
+    if c:
+        try:
+            c.ping()
+            status["redis"] = "ok"
+        except Exception:
+            status["redis"] = "error"
+    else:
         status["redis"] = "error"
 
     healthy = all(v == "ok" for v in status.values())
@@ -201,7 +212,12 @@ def shorten():
     conn.close()
 
     # Cache in Redis (expire after 1 hour)
-    cache.setex(f"url:{short_code}", 3600, original_url)
+    c = get_cache()
+    if c:
+        try:
+            c.setex(f"url:{short_code}", 3600, original_url)
+        except Exception:
+            pass
 
     # Use the actual host from headers for the public URL
     public_host = request.headers.get("X-Forwarded-Host", request.host)
@@ -228,7 +244,8 @@ def list_urls():
     urls = []
     for row in rows:
         # Check Redis for more up-to-date click count
-        cached_clicks = cache.get(f"clicks:{row['short_code']}")
+        c = get_cache()
+        cached_clicks = c.get(f"clicks:{row['short_code']}") if c else None
         clicks = int(cached_clicks) if cached_clicks else row["clicks"]
         urls.append({
             "id": row["id"],
@@ -262,7 +279,8 @@ def search_urls():
 
     urls = []
     for row in rows:
-        cached_clicks = cache.get(f"clicks:{row['short_code']}")
+        c = get_cache()
+        cached_clicks = c.get(f"clicks:{row['short_code']}") if c else None
         clicks = int(cached_clicks) if cached_clicks else row["clicks"]
         urls.append({
             "id": row["id"],
@@ -296,8 +314,13 @@ def delete_url(url_id):
     conn.close()
 
     # Clean up Redis
-    cache.delete(f"url:{short_code}")
-    cache.delete(f"clicks:{short_code}")
+    c = get_cache()
+    if c:
+        try:
+            c.delete(f"url:{short_code}")
+            c.delete(f"clicks:{short_code}")
+        except Exception:
+            pass
 
     return jsonify({"message": "URL deleted", "id": url_id}), 200
 
@@ -382,7 +405,8 @@ def analytics():
 def redirect_url(short_code):
     """Redirect to the original URL and increment click count."""
     # Try Redis cache first
-    original_url = cache.get(f"url:{short_code}")
+    c = get_cache()
+    original_url = c.get(f"url:{short_code}") if c else None
 
     if original_url:
         cache_stats["hits"] += 1
@@ -400,10 +424,18 @@ def redirect_url(short_code):
 
         original_url = row[0]
         # Store in cache for next time
-        cache.setex(f"url:{short_code}", 3600, original_url)
+        if c:
+            try:
+                c.setex(f"url:{short_code}", 3600, original_url)
+            except Exception:
+                pass
 
     # Increment click count in Redis (fast, atomic)
-    cache.incr(f"clicks:{short_code}")
+    if c:
+        try:
+            c.incr(f"clicks:{short_code}")
+        except Exception:
+            pass
 
     # Update PostgreSQL (clicks + analytics)
     try:
