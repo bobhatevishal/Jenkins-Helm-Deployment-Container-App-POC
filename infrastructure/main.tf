@@ -76,6 +76,7 @@ module "aca_api" {
   registry_server              = module.acr.login_server
   container_port               = 5000
   external_enabled             = false
+  probe_path                   = "/api/"
   tags                         = local.common_tags
 }
 

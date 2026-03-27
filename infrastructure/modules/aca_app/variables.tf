@@ -64,6 +64,12 @@ variable "is_http" {
   default     = true
 }
 
+variable "probe_path" {
+  type        = string
+  description = "The path for health probes."
+  default     = "/"
+}
+
 variable "external_enabled" {
   type        = bool
   description = "Whether the app is accessible from the internet."

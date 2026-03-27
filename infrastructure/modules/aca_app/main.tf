@@ -48,13 +48,13 @@ resource "azurerm_container_app" "app" {
       liveness_probe {
         port      = var.container_port
         transport = var.is_http ? "HTTP" : "TCP"
-        path      = var.is_http ? "/" : null
+        path      = var.is_http ? var.probe_path : null
       }
 
       readiness_probe {
         port      = var.container_port
         transport = var.is_http ? "HTTP" : "TCP"
-        path      = var.is_http ? "/" : null
+        path      = var.is_http ? var.probe_path : null
       }
     }
 
