@@ -195,10 +195,10 @@ def deployToACA(envName) {
 
         # Within the same ACA Environment, apps are reachable at http://<app-name> on port 80 (internal ingress).
         # No FQDN lookup is needed — ACA's built-in DNS handles the resolution.
-        az containerapp update \\\\
-            --name ${containerAppName} \\\\
-            --resource-group ${resourceGroup} \\\\
-            --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\\\
+        az containerapp update \\
+            --name ${containerAppName} \\
+            --resource-group ${resourceGroup} \\
+            --image ${targetAcrName}.azurecr.io/${env.COMPONENT_REPO}:${env.RESOLVED_TAG} \\
             --set-env-vars API_URL="http://${envName}-api"
     """
 }
